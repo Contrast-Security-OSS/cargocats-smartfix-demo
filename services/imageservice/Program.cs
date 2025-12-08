@@ -7,6 +7,27 @@ var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
 Directory.CreateDirectory(uploadsPath);
 Console.WriteLine($"[DEBUG] Image service starting. Uploads directory: {uploadsPath}");
 
+static string? ValidateAndSanitizePath(string userPath, string baseDirectory)
+{
+    var fileName = Path.GetFileName(userPath);
+    if (string.IsNullOrEmpty(fileName))
+    {
+        return null;
+    }
+    
+    var fullPath = Path.Combine(baseDirectory, fileName);
+    var normalizedFullPath = Path.GetFullPath(fullPath);
+    var normalizedBaseDirectory = Path.GetFullPath(baseDirectory);
+    
+    if (!normalizedFullPath.StartsWith(normalizedBaseDirectory + Path.DirectorySeparatorChar) &&
+        !normalizedFullPath.Equals(normalizedBaseDirectory))
+    {
+        return null;
+    }
+    
+    return normalizedFullPath;
+}
+
 app.MapGet("/", () =>
 {
     Console.WriteLine("[DEBUG] GET / - Retrieving photo list");
@@ -72,7 +93,15 @@ app.MapGet("/getphoto", (string path) =>
         Console.WriteLine("[DEBUG] Path parameter is empty or null");
         return Results.BadRequest("Path parameter is required");
     }
-    var fullPath = Path.Combine(uploadsPath, path);
+    
+    var sanitizedPath = ValidateAndSanitizePath(path, uploadsPath);
+    if (sanitizedPath == null)
+    {
+        Console.WriteLine($"[DEBUG] Invalid path detected: {path}");
+        return Results.BadRequest("Invalid file path");
+    }
+    
+    var fullPath = sanitizedPath;
     Console.WriteLine($"[DEBUG] Full file path: {fullPath}");
 
     if (!File.Exists(fullPath))
