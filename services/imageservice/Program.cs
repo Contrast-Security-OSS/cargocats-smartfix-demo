@@ -72,6 +72,13 @@ app.MapGet("/getphoto", (string path) =>
         Console.WriteLine("[DEBUG] Path parameter is empty or null");
         return Results.BadRequest("Path parameter is required");
     }
+    
+    if (!IsValidFilePath(path, uploadsPath))
+    {
+        Console.WriteLine($"[DEBUG] Invalid path detected: {path}");
+        return Results.BadRequest("Invalid file path");
+    }
+    
     var fullPath = Path.Combine(uploadsPath, path);
     Console.WriteLine($"[DEBUG] Full file path: {fullPath}");
 
@@ -100,6 +107,20 @@ app.MapGet("/getphoto", (string path) =>
     Console.WriteLine($"[DEBUG] File size: {fileBytes.Length} bytes");
     return Results.File(fileBytes, contentType);
 });
+
+static bool IsValidFilePath(string userPath, string baseDirectory)
+{
+    try
+    {
+        var fullPath = Path.GetFullPath(Path.Combine(baseDirectory, userPath));
+        var normalizedBase = Path.GetFullPath(baseDirectory);
+        return fullPath.StartsWith(normalizedBase, StringComparison.OrdinalIgnoreCase);
+    }
+    catch
+    {
+        return false;
+    }
+}
 
 Console.WriteLine("[DEBUG] Starting image service application...");
 app.Run();
