@@ -50,13 +50,18 @@ jobs:
       # If using API keys, omit the "Configure AWS Credentials" step above
       # and uncomment the aws_bearer_token_bedrock and aws_region lines below in the action inputs
 
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
 
       - name: Run Contrast AI SmartFix - Generate Fixes Action
-        uses: Contrast-Security-OSS/contrast-ai-smartfix-action@v1.0.11
+        uses: Contrast-Security-OSS/contrast-ai-smartfix-action@1d172aa310498d4eb66978fd75ba3c3028d28105 # v1.0.11
         with:
           # --- Max Open PRs ---
           max_open_prs: 20
@@ -101,13 +106,18 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name), 'contrast-vuln-id:VULN-')
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
 
       - name: Notify Contrast on PR Merge
-        uses: Contrast-Security-OSS/contrast-ai-smartfix-action@v1
+        uses: Contrast-Security-OSS/contrast-ai-smartfix-action@020b093708b41844d005aa869aea45f9b64bea7d # v1.0.16
         with:
           run_task: merge
           # --- GitHub Token ---
@@ -126,13 +136,18 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == false && contains(join(github.event.pull_request.labels.*.name), 'contrast-vuln-id:VULN-')
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
 
       - name: Notify Contrast on PR Closed
-        uses: Contrast-Security-OSS/contrast-ai-smartfix-action@v1
+        uses: Contrast-Security-OSS/contrast-ai-smartfix-action@020b093708b41844d005aa869aea45f9b64bea7d # v1.0.16
         with:
           run_task: closed
           # --- GitHub Token ---
